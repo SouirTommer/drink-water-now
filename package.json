@@ -1,9 +1,9 @@
 {
   "name": "drink-water",
-  "displayName": "Drink Water Reminder",
-  "description": "💧 Hydration & caffeine break reminder — status bar only, no modals.",
+  "displayName": "Drink Water",
+  "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo. Customizable messages in 3 languages.",
   "version": "0.0.1",
-  "publisher": "demo",
+  "publisher": "Tommer",
   "engines": {
     "vscode": "^1.85.0"
   },
@@ -33,9 +33,19 @@
           "default": true,
           "description": "%drinkWater.enabled.description%"
         },
+        "drinkWater.modal": {
+          "type": "boolean",
+          "default": true,
+          "description": "%drinkWater.modal.description%"
+        },
+        "drinkWater.bounceLogo": {
+          "type": "boolean",
+          "default": true,
+          "description": "%drinkWater.bounceLogo.description%"
+        },
         "drinkWater.intervalMinutes": {
           "type": "number",
-          "default": 1,
+          "default": 30,
           "minimum": 1,
           "description": "%drinkWater.intervalMinutes.description%"
         },

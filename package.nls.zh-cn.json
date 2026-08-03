@@ -2,6 +2,8 @@
   "drinkWater.dismiss.title": "重置饮水计时",
   "drinkWater.remindNow.title": "立即显示饮水提醒",
   "drinkWater.enabled.description": "启用提醒",
+  "drinkWater.modal.description": "到点时弹出对话框；关闭则只在状态栏显示",
+  "drinkWater.bounceLogo.description": "到点时弹出 Bouncing DVD 风格的黑底面板，💧 在里面弹来弹去（20 秒自动关闭）",
   "drinkWater.intervalMinutes.description": "提醒间隔（分钟）",
   "drinkWater.language.description": "内置提醒短句的语言；'auto' 会跟随 VS Code 显示语言",
   "drinkWater.messages.description": "轮流显示的提醒短句；留空则使用英文短句，也可自行填写任何语言"

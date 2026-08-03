@@ -2,6 +2,8 @@
   "drinkWater.dismiss.title": "Reset Drink Water Timer",
   "drinkWater.remindNow.title": "Show Drink Water Reminder Now",
   "drinkWater.enabled.description": "Enable the reminder",
+  "drinkWater.modal.description": "Show a modal dialog when it's time to drink. Turn off to only show the status bar reminder.",
+  "drinkWater.bounceLogo.description": "Show a bouncing DVD-style logo panel when it's time to drink (closes by itself after 20s).",
   "drinkWater.intervalMinutes.description": "Reminder interval (minutes)",
   "drinkWater.language.description": "Language of the built-in reminder messages. 'auto' follows the VS Code display language.",
   "drinkWater.messages.description": "Reminder messages, shown in turn. Leave empty to use the built-in messages; add your own in any language."
