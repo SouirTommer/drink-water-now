@@ -2,7 +2,7 @@
   "name": "drink-water-nag",
   "displayName": "Drink Water Nag",
   "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo.",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "publisher": "souirtommer",
   "repository": {
     "type": "git",

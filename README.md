@@ -1,4 +1,4 @@
-# 💧 drink-water
+# Drink the water right nowww
 
 ![demo](animation_720.gif)
 
