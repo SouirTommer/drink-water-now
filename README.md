@@ -16,7 +16,7 @@ Stop coding, is time to drink water. That's the whole thing.
 5. Countdown in the status bar (bottom right). Click it to pause/resume
 6. Auto-freeze when you step away, resumes when you start typing
 7. Drink history in the Explorer view — a GitHub-style contribution heatmap (15 weeks) of every cup
-8. Blockers have a **Snooze** button, and every week you get a summary toast (cups / liters / daily average)
+8. Blockers have a **Snooze** button
 
 ## Install
 
