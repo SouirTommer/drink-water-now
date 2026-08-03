@@ -1,7 +1,7 @@
 {
   "name": "drink-water",
   "displayName": "Drink Water Reminder",
-  "description": "💧 夠鐘飲水啦！— Status Bar 飲水／休息提醒",
+  "description": "💧 Hydration & caffeine break reminder — status bar only, no modals.",
   "version": "0.0.1",
   "publisher": "demo",
   "engines": {
@@ -19,6 +19,10 @@
       {
         "command": "drinkWater.dismiss",
         "title": "%drinkWater.dismiss.title%"
+      },
+      {
+        "command": "drinkWater.remindNow",
+        "title": "%drinkWater.remindNow.title%"
       }
     ],
     "configuration": {
@@ -34,6 +38,12 @@
           "default": 1,
           "minimum": 1,
           "description": "%drinkWater.intervalMinutes.description%"
+        },
+        "drinkWater.language": {
+          "type": "string",
+          "enum": ["auto", "en", "zh-tw", "zh-cn"],
+          "default": "auto",
+          "description": "%drinkWater.language.description%"
         },
         "drinkWater.messages": {
           "type": "array",

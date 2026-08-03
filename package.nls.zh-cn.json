@@ -1,6 +1,8 @@
 {
   "drinkWater.dismiss.title": "重置饮水计时",
+  "drinkWater.remindNow.title": "立即显示饮水提醒",
   "drinkWater.enabled.description": "启用提醒",
   "drinkWater.intervalMinutes.description": "提醒间隔（分钟）",
-  "drinkWater.messages.description": "轮流显示的提醒短句；留空则使用内置的本地语言短句（跟随 VS Code 显示语言）"
+  "drinkWater.language.description": "内置提醒短句的语言；'auto' 会跟随 VS Code 显示语言",
+  "drinkWater.messages.description": "轮流显示的提醒短句；留空则使用英文短句，也可自行填写任何语言"
 }

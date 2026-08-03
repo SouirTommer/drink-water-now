@@ -1,6 +1,8 @@
 {
   "drinkWater.dismiss.title": "Reset Drink Water Timer",
+  "drinkWater.remindNow.title": "Show Drink Water Reminder Now",
   "drinkWater.enabled.description": "Enable the reminder",
   "drinkWater.intervalMinutes.description": "Reminder interval (minutes)",
-  "drinkWater.messages.description": "Reminder messages, shown in turn. Leave empty to use built-in localized messages for your VS Code language."
+  "drinkWater.language.description": "Language of the built-in reminder messages. 'auto' follows the VS Code display language.",
+  "drinkWater.messages.description": "Reminder messages, shown in turn. Leave empty to use the built-in messages; add your own in any language."
 }
