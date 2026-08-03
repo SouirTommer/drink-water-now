@@ -1,7 +1,7 @@
 {
-  "name": "drink-water",
-  "displayName": "Drink Water",
-  "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo. Customizable messages in 3 languages.",
+  "name": "drink-water-now",
+  "displayName": "Drink Water reminder",
+  "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo.",
   "version": "0.0.1",
   "publisher": "Tommer",
   "engines": {
@@ -51,9 +51,20 @@
         },
         "drinkWater.language": {
           "type": "string",
-          "enum": ["auto", "en", "zh-tw", "zh-cn"],
+          "enum": [
+            "auto",
+            "en",
+            "zh-tw",
+            "zh-cn"
+          ],
           "default": "auto",
           "description": "%drinkWater.language.description%"
+        },
+        "drinkWater.cupTarget": {
+          "type": "number",
+          "default": 8,
+          "minimum": 0,
+          "description": "%drinkWater.cupTarget.description%"
         },
         "drinkWater.messages": {
           "type": "array",
@@ -69,11 +80,13 @@
   "scripts": {
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
+    "package": "vsce package",
     "vscode:prepublish": "npm run compile"
   },
   "devDependencies": {
     "@types/node": "^20.19.43",
-    "@types/vscode": "^1.125.0",
+    "@types/vscode": "^1.85.0",
+    "@vscode/vsce": "^2.32.0",
     "typescript": "^5.9.3"
   }
 }

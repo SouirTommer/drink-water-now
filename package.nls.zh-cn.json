@@ -6,5 +6,6 @@
   "drinkWater.bounceLogo.description": "到点时弹出 Bouncing DVD 风格的黑底面板，💧 在里面弹来弹去（20 秒自动关闭）",
   "drinkWater.intervalMinutes.description": "提醒间隔（分钟）",
   "drinkWater.language.description": "内置提醒短句的语言；'auto' 会跟随 VS Code 显示语言",
+  "drinkWater.cupTarget.description": "每日饮水目标（杯数），显示在状态栏；设为 0 则不显示。点击一下提醒计一杯。",
   "drinkWater.messages.description": "轮流显示的提醒短句；留空则使用英文短句，也可自行填写任何语言"
 }

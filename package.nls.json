@@ -6,5 +6,6 @@
   "drinkWater.bounceLogo.description": "Show a bouncing DVD-style logo panel when it's time to drink (closes by itself after 20s).",
   "drinkWater.intervalMinutes.description": "Reminder interval (minutes)",
   "drinkWater.language.description": "Language of the built-in reminder messages. 'auto' follows the VS Code display language.",
+  "drinkWater.cupTarget.description": "Daily hydration goal (cups), shown in the status bar. Set to 0 to hide. Clicking the reminder counts a cup.",
   "drinkWater.messages.description": "Reminder messages, shown in turn. Leave empty to use the built-in messages; add your own in any language."
 }
