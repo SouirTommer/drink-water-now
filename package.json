@@ -2,7 +2,7 @@
   "name": "drink-water-nag",
   "displayName": "Drink Water Nag",
   "description": "Hydration & caffeine break reminders — status bar, blocking fullscreen page, or bouncing DVD logo.",
-  "version": "0.0.4",
+  "version": "0.0.6",
   "publisher": "souirtommer",
   "repository": {
     "type": "git",
@@ -34,6 +34,10 @@
       {
         "command": "drinkWater.dismiss",
         "title": "%drinkWater.dismiss.title%"
+      },
+      {
+        "command": "drinkWater.add",
+        "title": "%drinkWater.add.title%"
       },
       {
         "command": "drinkWater.remindNow",
@@ -83,6 +87,39 @@
           "minimum": 1,
           "description": "%drinkWater.mlPerCup.description%"
         },
+        "drinkWater.cupSizes": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [150, 250, 350, 500],
+          "description": "%drinkWater.cupSizes.description%"
+        },
+        "drinkWater.fastDrinkMode": {
+          "type": "boolean",
+          "default": false,
+          "description": "%drinkWater.fastDrinkMode.description%"
+        },
+        "drinkWater.targetMl": {
+          "type": "number",
+          "default": 2500,
+          "minimum": 0,
+          "description": "%drinkWater.targetMl.description%"
+        },
+        "drinkWater.milestones": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          },
+          "default": [1500, 2000, 4000],
+          "description": "%drinkWater.milestones.description%"
+        },
+        "drinkWater.snoozeMinutes": {
+          "type": "number",
+          "default": 10,
+          "minimum": 1,
+          "description": "%drinkWater.snoozeMinutes.description%"
+        },
         "drinkWater.bounceLogo": {
           "type": "boolean",
           "default": true,
@@ -110,12 +147,6 @@
           ],
           "default": "auto",
           "description": "%drinkWater.language.description%"
-        },
-        "drinkWater.cupTarget": {
-          "type": "number",
-          "default": 8,
-          "minimum": 0,
-          "description": "%drinkWater.cupTarget.description%"
         },
         "drinkWater.messages": {
           "type": "array",

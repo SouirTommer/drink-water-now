@@ -1,6 +1,7 @@
 {
   "drinkWater.history.name": "Drink History",
-  "drinkWater.dismiss.title": "Reset Drink Water Timer",
+  "drinkWater.dismiss.title": "Record a Cup (Default Size)",
+  "drinkWater.add.title": "Record a Drink (Choose Size)",
   "drinkWater.remindNow.title": "Show Drink Water Reminder Now",
   "drinkWater.resetAll.title": "Reset All Drink Records",
   "drinkWater.resetToday.title": "Reset Today's Drink Records",
@@ -10,10 +11,14 @@
   "drinkWater.redAlert.description": "Switch VS Code to the red color theme when it's time to drink, restore after you confirm.",
   "drinkWater.confirmDelaySeconds.description": "How long the blocker's confirm button stays disabled (seconds). 0 = immediately clickable.",
   "drinkWater.mlPerCup.description": "Milliliters added to the daily total each time you record a cup. Default 350ml.",
+  "drinkWater.targetMl.description": "Daily hydration goal in ml.",
+  "drinkWater.cupSizes.description": "Available cup sizes for the drink picker, in ml.",
+  "drinkWater.fastDrinkMode.description": "If enabled, record a drink immediately as mlPerCup without showing the cup-size picker.",
+  "drinkWater.milestones.description": "Milliliter milestones that fire a celebration toast when crossed.",
+  "drinkWater.snoozeMinutes.description": "How long the blocker's Snooze button postpones the reminder (minutes).",
   "drinkWater.bounceLogo.description": "Show a bouncing DVD-style logo panel when it's time to drink (closes by itself after 20s).",
   "drinkWater.intervalMinutes.description": "Reminder interval (minutes)",
   "drinkWater.idlePauseMinutes.description": "Auto-pause the countdown when you've been idle (no typing) this many minutes. 0 = off.",
   "drinkWater.language.description": "Language of the built-in reminder messages. 'auto' follows the VS Code display language.",
-  "drinkWater.cupTarget.description": "Daily hydration goal (cups), shown in the status bar. Set to 0 to hide. Clicking the reminder counts a cup.",
   "drinkWater.messages.description": "Reminder messages, shown in turn. Leave empty to use the built-in messages; add your own in any language."
 }

@@ -16,6 +16,7 @@ Stop coding, is time to drink water. That's the whole thing.
 5. Countdown in the status bar (bottom right). Click it to pause/resume
 6. Auto-freeze when you step away, resumes when you start typing
 7. Drink history in the Explorer view — a GitHub-style contribution heatmap (15 weeks) of every cup
+8. Blockers have a **Snooze** button, and every week you get a summary toast (cups / liters / daily average)
 
 ## Install
 
@@ -44,15 +45,20 @@ Search `drink water` in Settings. Everything has a default, so you don't need to
 | `drinkWater.confirmDelaySeconds` | `3` | Blocker confirm button delay (0–30s). `0` = clickable immediately |
 | `drinkWater.bounceLogo` | `true` | DVD screensaver panel. Also set to false if you hate it |
 | `drinkWater.language` | `auto` | `auto`, `en`, `zh-tw`, `zh-cn` |
-| `drinkWater.cupTarget` | `8` | Daily goal (cups). The status bar shows `ml / goal-ml`. `0` hides the target |
+| `drinkWater.cupSizes` | `[150, 250, 350, 500]` | Available cup sizes for the drink picker, in ml |
+| `drinkWater.fastDrinkMode` | `false` | Quickly record a drink using `mlPerCup` without prompting for cup size |
+| `drinkWater.targetMl` | `2500` | Daily goal in ml directly |
 | `drinkWater.mlPerCup` | `350` | ml added per recorded cup |
+| `drinkWater.milestones` | `[1500, 2000, 4000]` | Celebration toasts at these daily totals (ml) |
+| `drinkWater.snoozeMinutes` | `10` | How long the blocker's Snooze button postpones the reminder |
 | `drinkWater.messages` | `[]` | Custom messages, cycled in order. Empty = built-in |
 
 One thing to know: `drinkWater.messages` overrides the language setting. If you set custom messages, they're used as-is, whatever language they're in.
 
 ## Commands
 
-- **Reset Drink Water Timer** — resets and records a cup (same as clicking the status bar)
+- **Reset Drink Water Timer** — resets and records a cup (default size)
+- **Record a Drink (Choose Size)** — opens a picker: 150/250/350/500ml or custom. Clicking the status bar does this too
 - **Show Drink Water Reminder Now** — fires a reminder on demand. Handy for testing without waiting 30 minutes
 - **Pause/Resume Drink Water Countdown** — same as clicking the countdown in the status bar
 - **Reset Today's Drink Records** — clears today's history and counter
@@ -120,7 +126,9 @@ npm run package
 | `drinkWater.confirmDelaySeconds` | `3` | 擋門確認按鈕的延遲（0–30 秒）。`0` = 立刻可點 |
 | `drinkWater.bounceLogo` | `true` | DVD 螢幕保護面板。討厭的話可以關掉 |
 | `drinkWater.language` | `auto` | `auto`、`en`、`zh-tw`、`zh-cn` |
-| `drinkWater.cupTarget` | `8` | 每日目標（杯數）。狀態列顯示 `ml / 目標ml`。`0` = 不顯示目標 |
+| `drinkWater.cupSizes` | `[150, 250, 350, 500]` | 飲水選單可選杯數，單位為 ml |
+| `drinkWater.fastDrinkMode` | `false` | 快速記錄一杯，直接使用 `mlPerCup`，不再詢問杯量 |
+| `drinkWater.targetMl` | `2500` | 每日目標 ml |
 | `drinkWater.mlPerCup` | `350` | 每記錄一杯所加的毫升數 |
 | `drinkWater.messages` | `[]` | 自訂提醒短句，依序輪播。留空 = 使用內建短句 |
 

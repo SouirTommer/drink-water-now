@@ -1,6 +1,7 @@
 {
   "drinkWater.history.name": "饮水记录",
-  "drinkWater.dismiss.title": "重置饮水计时",
+  "drinkWater.dismiss.title": "记录一杯（默认容量）",
+  "drinkWater.add.title": "记录饮水（选择容量）",
   "drinkWater.remindNow.title": "立即显示饮水提醒",
   "drinkWater.resetAll.title": "重置全部饮水记录",
   "drinkWater.resetToday.title": "重置今日饮水记录",
@@ -10,10 +11,14 @@
   "drinkWater.redAlert.description": "提醒时将 VS Code 切换成红色主题，确认饮水后还原。",
   "drinkWater.confirmDelaySeconds.description": "拦门确认按钮要等几秒才能点（秒）；0 = 立刻可点",
   "drinkWater.mlPerCup.description": "每次记录一杯时加入每日总量的毫升数。默认 350ml。",
+  "drinkWater.cupSizes.description": "饮水选单中可选的杯数，单位为 ml。",
+  "drinkWater.fastDrinkMode.description": "开启后直接以 mlPerCup 记录饮水，不再弹出杯数选择。",
+  "drinkWater.targetMl.description": "每日饮水目标（ml）。",
+  "drinkWater.milestones.description": "到达即弹祝贺通知的毫升里程碑。",
+  "drinkWater.snoozeMinutes.description": "拦门「稍后提醒」按钮延后几分钟。",
   "drinkWater.bounceLogo.description": "到点时弹出 Bouncing DVD 风格的黑底面板，💧 在里面弹来弹去（20 秒自动关闭）",
   "drinkWater.intervalMinutes.description": "提醒间隔（分钟）",
   "drinkWater.idlePauseMinutes.description": "无输入这么久（分钟）就自动冻结倒计时；0 = 关闭",
   "drinkWater.language.description": "内置提醒短句的语言；'auto' 会跟随 VS Code 显示语言",
-  "drinkWater.cupTarget.description": "每日饮水目标（杯数），显示在状态栏；设为 0 则不显示。点击一下提醒计一杯。",
   "drinkWater.messages.description": "轮流显示的提醒短句；留空则使用英文短句，也可自行填写任何语言"
 }

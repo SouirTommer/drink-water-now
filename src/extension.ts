@@ -17,8 +17,8 @@ interface TimerState {
 export function activate(context: vscode.ExtensionContext): void {
   console.log('[drink-water] activated');
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
-  item.command = 'drinkWater.dismiss';
-  item.tooltip = '💧 Drink water — click to count a cup (ml)';
+  item.command = 'drinkWater.add';
+  item.tooltip = '💧 Drink water — click to record a cup (choose size)';
 
   const countdown = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   countdown.command = 'drinkWater.togglePause';
@@ -154,7 +154,10 @@ export function activate(context: vscode.ExtensionContext): void {
   const intervalMs = (): number => (get('intervalMinutes') as number) * 60000;
 
   const mlPerCup = (): number => (get('mlPerCup') as number) || 350;
-  const targetMl = (): number => (get('cupTarget') as number) * mlPerCup();
+  const cupSizes = (): number[] => (get('cupSizes') as number[]) || [150, 250, 350, 500];
+  const fastDrinkMode = (): boolean => (get('fastDrinkMode') as boolean) ?? false;
+  const milestones = (): number[] => (get('milestones') as number[]) || [1500, 2000, 4000];
+  const targetMl = (): number => get('targetMl') as number;
 
   function getMl(): number {
     const s = context.globalState.get<{ date: string; ml: number }>('cups', { date: '', ml: 0 });
@@ -264,6 +267,7 @@ export function activate(context: vscode.ExtensionContext): void {
     blockerDismissed = false;
     const cfg = vscode.workspace.getConfiguration('drinkWater');
     const delay = cfg.get<number>('confirmDelaySeconds', 3);
+    const snooze = cfg.get<number>('snoozeMinutes', 10);
     const bounce = cfg.get<boolean>('bounceLogo', false);
     const safe = msg.replace(/</g, '&lt;').replace(/&/g, '&amp;').replace(/>/g, '&gt;');
     const logoCss = bounce
@@ -301,9 +305,11 @@ export function activate(context: vscode.ExtensionContext): void {
              align-items: center; }
   h1 { font-size: 44px; margin: 8px 0; }
   p  { font-size: 20px; opacity: .85; max-width: 720px; text-align: center; }
-  button { margin-top: 32px; font-size: 22px; padding: 16px 48px; border: none;
-    border-radius: 8px; cursor: pointer; background: #4fc3f7; color: #000; }
-  button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+  .btns { display: flex; gap: 16px; margin-top: 32px; }
+  button { font-size: 22px; padding: 16px 48px; border: none; border-radius: 8px; cursor: pointer; }
+  #ok { background: #4fc3f7; color: #000; }
+  #ok:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+  #snooze { background: transparent; color: #fff; border: 1px solid #888; padding: 16px 32px; }
   #cd { font-size: 16px; margin-top: 14px; opacity: .6; }
   ${logoCss}
 </style>
@@ -313,7 +319,10 @@ export function activate(context: vscode.ExtensionContext): void {
     <h1>💧</h1>
     <h1>DRINK WATER NOW</h1>
     <p>${safe}</p>
-    <button id="ok" disabled>I drank some water</button>
+    <div class="btns">
+      <button id="ok" disabled>I drank some water</button>
+      <button id="snooze">Snooze ${snooze} min</button>
+    </div>
     <div id="cd"></div>
   </div>
   <script>
@@ -334,6 +343,9 @@ export function activate(context: vscode.ExtensionContext): void {
     ok.addEventListener('click', () => {
       acquireVsCodeApi().postMessage({ command: 'confirm' });
     });
+    document.getElementById('snooze').addEventListener('click', () => {
+      acquireVsCodeApi().postMessage({ command: 'snooze' });
+    });
     const logo = document.getElementById('logo');
     if (logo) {
       logo.addEventListener('click', () => {
@@ -351,6 +363,10 @@ export function activate(context: vscode.ExtensionContext): void {
             blockerDismissed = true;
             panel.dispose();
             dismiss();
+          } else if (m.command === 'snooze') {
+            blockerDismissed = true;
+            panel.dispose();
+            snoozeReminder();
           }
         });
         panel.onDidDispose(() => {
@@ -363,20 +379,20 @@ export function activate(context: vscode.ExtensionContext): void {
     makePanel();
   }
 
-  function dismiss(): void {
+  function record(ml: number): void {
     const s = context.globalState.get<{ date: string; ml: number }>('cups', { date: '', ml: 0 });
     const oldMl = s.date === today() ? (typeof s.ml === 'number' ? s.ml : 0) : 0;
-    const ml = oldMl + mlPerCup();
+    const newMl = oldMl + ml;
     const drinks = context.globalState.get<number[]>('drinks', []);
     drinks.push(Date.now());
     const t = targetMl();
-    item.text = `${t > 0 ? `💧 ${ml}ml/${t}ml` : `💧 ${ml}ml`} ✓`;
-    const crossed = [1500, 2000, 4000].find((th) => ml >= th && oldMl < th);
+    item.text = `${t > 0 ? `💧 ${newMl}ml/${t}ml` : `💧 ${newMl}ml`} ✓`;
+    const crossed = milestones().find((th) => newMl >= th && oldMl < th);
     if (crossed !== undefined) {
       void vscode.window.showInformationMessage(`🎉 ${crossed}ml today! Keep it up.`);
     }
     void Promise.all([
-      context.globalState.update('cups', { date: today(), ml }),
+      context.globalState.update('cups', { date: today(), ml: newMl }),
       context.globalState.update('drinks', drinks),
     ]).then(() => drinkProvider.refresh(true));
     redAlert(false);
@@ -385,6 +401,53 @@ export function activate(context: vscode.ExtensionContext): void {
     setTimeout(() => {
       updateIdle();
     }, 1200);
+  }
+
+  function dismiss(): void {
+    record(mlPerCup());
+  }
+
+  function snoozeReminder(): void {
+    redAlert(false);
+    writeTimer({ nextDue: Date.now() + ((get('snoozeMinutes') as number) || 10) * 60000, pausedSince: null });
+    updateIdle();
+    showCountdown(readTimer());
+  }
+
+  function add(): void {
+    const def = mlPerCup();
+    if (fastDrinkMode()) {
+      record(def);
+      return;
+    }
+    const sizes = [...new Set([def, ...cupSizes()])];
+    const items = sizes.map((ml) => ({
+      label: `${ml}ml`,
+      description: ml === def ? 'default' : undefined,
+      ml,
+    }));
+    items.push({ label: '$(symbol-numeric) Custom…', description: 'type your own ml', ml: 0 });
+    const pick = vscode.window.createQuickPick<{ label: string; description?: string; ml: number }>();
+    pick.items = items;
+    pick.placeholder = 'How much did you drink?';
+    pick.onDidAccept(() => {
+      const sel = pick.selectedItems[0];
+      pick.hide();
+      if (!sel) return;
+      if (sel.ml > 0) {
+        record(sel.ml);
+      } else {
+        void vscode.window
+          .showInputBox({
+            prompt: 'ml',
+            validateInput: (v) => (Number(v) > 0 ? undefined : 'Enter a number > 0'),
+          })
+          .then((v) => {
+            if (v) record(Number(v));
+          });
+      }
+    });
+    pick.show();
   }
 
   function redAlert(on: boolean): void {
@@ -461,6 +524,7 @@ export function activate(context: vscode.ExtensionContext): void {
       webviewOptions: { retainContextWhenHidden: true },
     }),
     vscode.commands.registerCommand('drinkWater.dismiss', dismiss),
+    vscode.commands.registerCommand('drinkWater.add', add),
     vscode.commands.registerCommand('drinkWater.resetAll', () => resetDrinks(true)),
     vscode.commands.registerCommand('drinkWater.resetToday', () => resetDrinks(false)),
     vscode.commands.registerCommand('drinkWater.remindNow', remind),
