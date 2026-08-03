@@ -72,13 +72,13 @@ export function activate(context: vscode.ExtensionContext): void {
       'drinkWater.bounce',
       '💧 DRINK!',
       vscode.ViewColumn.Active,
-      {}
+      { enableScripts: true }
     );
     panel.webview.html = `<!DOCTYPE html>
 <html>
 <style>
   html, body { margin: 0; height: 100%; background: #000; overflow: hidden; }
-  #logo { position: absolute; width: 100px; height: 120px;
+  #logo { position: absolute; width: 100px; height: 120px; cursor: pointer;
           animation: bx 7s linear infinite, by 5s linear infinite; }
   @keyframes bx { 0% { left: 0; } 50% { left: calc(100% - 100px); } 100% { left: 0; } }
   @keyframes by { 0% { top: 0; } 25% { top: calc(100% - 120px); } 50% { top: 0; }
@@ -91,8 +91,16 @@ export function activate(context: vscode.ExtensionContext): void {
       <ellipse cx="38" cy="78" rx="10" ry="5" fill="#e1f5fe" opacity="0.7"/>
     </svg>
   </div>
+  <script>
+    document.getElementById('logo').addEventListener('click', () => {
+      acquireVsCodeApi().postMessage({ command: 'close' });
+    });
+  </script>
 </body>
 </html>`;
+    panel.webview.onDidReceiveMessage((msg) => {
+      if (msg.command === 'close') panel.dispose();
+    });
     const t = setTimeout(() => panel.dispose(), 20000);
     panel.onDidDispose(() => clearTimeout(t));
   }
