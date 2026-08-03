@@ -2,11 +2,11 @@
   "name": "drink-water-nag",
   "displayName": "Drink Water Nag",
   "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo.",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "publisher": "souirtommer",
   "repository": {
     "type": "git",
-    "url": "https://github.com/souirtommer/drink-water-now"
+    "url": "https://github.com/souirtommer/vscode-drinkwater"
   },
   "engines": {
     "vscode": "^1.85.0"
@@ -18,6 +18,7 @@
     "onStartupFinished"
   ],
   "main": "./out/extension.js",
+  "icon": "icon.png",
   "contributes": {
     "commands": [
       {
@@ -27,6 +28,10 @@
       {
         "command": "drinkWater.remindNow",
         "title": "%drinkWater.remindNow.title%"
+      },
+      {
+        "command": "drinkWater.togglePause",
+        "title": "%drinkWater.togglePause.title%"
       }
     ],
     "configuration": {
@@ -52,6 +57,12 @@
           "default": 30,
           "minimum": 1,
           "description": "%drinkWater.intervalMinutes.description%"
+        },
+        "drinkWater.idlePauseMinutes": {
+          "type": "number",
+          "default": 5,
+          "minimum": 0,
+          "description": "%drinkWater.idlePauseMinutes.description%"
         },
         "drinkWater.language": {
           "type": "string",

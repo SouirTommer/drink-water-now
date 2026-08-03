@@ -9,19 +9,38 @@ function messages(): string[] {
   return defaultMessages(lang === 'auto' ? vscode.env.language : lang);
 }
 
+interface TimerState {
+  nextDue: number;
+  pausedSince: number | null;
+}
+
 export function activate(context: vscode.ExtensionContext): void {
   console.log('[drink-water] activated');
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   item.command = 'drinkWater.dismiss';
-  item.tooltip = '💧 Drink water reminder — click to count a cup';
+  item.tooltip = '💧 Drink water — click to count a cup';
 
-  let timer: ReturnType<typeof setInterval> | undefined;
+  const countdown = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
+  countdown.command = 'drinkWater.togglePause';
+  countdown.tooltip = '⏱ Click to pause/resume';
+
+  let ticker: ReturnType<typeof setInterval> | undefined;
   let i = 0;
+  let lastActivity = Date.now();
 
   const get = (key: string): unknown =>
     vscode.workspace.getConfiguration('drinkWater').get(key);
 
   const today = (): string => new Date().toISOString().slice(0, 10);
+
+  const readTimer = (): TimerState =>
+    context.globalState.get<TimerState>('timer', { nextDue: Date.now(), pausedSince: null });
+
+  const writeTimer = (s: TimerState): void => {
+    void context.globalState.update('timer', s);
+  };
+
+  const intervalMs = (): number => (get('intervalMinutes') as number) * 60000;
 
   function getCups(): number {
     const s = context.globalState.get<{ date: string; count: number }>('cups', { date: '', count: 0 });
@@ -39,11 +58,54 @@ export function activate(context: vscode.ExtensionContext): void {
     item.show();
   }
 
-  function start(): void {
-    if (timer) clearInterval(timer);
-    const minutes = get('intervalMinutes') as number;
-    if (!get('enabled') || !(minutes > 0)) return;
-    timer = setInterval(remind, minutes * 60000);
+  function showCountdown(s: TimerState): void {
+    const base = s.pausedSince !== null ? s.pausedSince : Date.now();
+    const total = Math.max(0, Math.ceil((s.nextDue - base) / 1000));
+    const h = Math.floor(total / 3600);
+    const m = Math.floor((total % 3600) / 60);
+    const sec = total % 60;
+    const clock = h > 0
+      ? `${h}:${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`
+      : `${String(m).padStart(2, '0')}:${String(sec).padStart(2, '0')}`;
+    countdown.text = `${s.pausedSince !== null ? '$(debug-pause)' : '$(watch)'} ${clock}`;
+    countdown.show();
+  }
+
+  function tick(): void {
+    if (!get('enabled')) {
+      countdown.hide();
+      return;
+    }
+    const now = Date.now();
+    const idleMin = get('idlePauseMinutes') as number;
+    if (idleMin > 0 && now - lastActivity > idleMin * 60000) {
+      writeTimer({ ...readTimer(), pausedSince: now });
+      lastActivity = now;
+    }
+    const s = readTimer();
+    if (s.pausedSince !== null) {
+      showCountdown(s);
+      return;
+    }
+    if (s.nextDue <= now) {
+      remind();
+      writeTimer({ nextDue: now + intervalMs(), pausedSince: null });
+      showCountdown(readTimer());
+      return;
+    }
+    showCountdown(s);
+  }
+
+  function togglePause(): void {
+    const s = readTimer();
+    const now = Date.now();
+    if (s.pausedSince === null) {
+      writeTimer({ ...s, pausedSince: now });
+    } else {
+      writeTimer({ nextDue: s.nextDue + (now - s.pausedSince), pausedSince: null });
+    }
+    lastActivity = now;
+    showCountdown(readTimer());
   }
 
   function remind(): void {
@@ -105,15 +167,29 @@ export function activate(context: vscode.ExtensionContext): void {
     panel.onDidDispose(() => clearTimeout(t));
   }
 
+  const st = context.globalState.get<TimerState>('timer', {
+    nextDue: Date.now() + intervalMs(),
+    pausedSince: null,
+  });
+  if (st.nextDue <= Date.now()) st.nextDue = Date.now();
+  writeTimer(st);
   updateIdle();
-  start();
+  tick();
+  ticker = setInterval(tick, 1000);
+
   context.subscriptions.push(
     item,
+    countdown,
     vscode.commands.registerCommand('drinkWater.dismiss', dismiss),
     vscode.commands.registerCommand('drinkWater.remindNow', remind),
+    vscode.commands.registerCommand('drinkWater.togglePause', togglePause),
+    vscode.workspace.onDidChangeTextDocument(() => {
+      lastActivity = Date.now();
+    }),
     vscode.workspace.onDidChangeConfiguration((e) => {
       if (e.affectsConfiguration('drinkWater')) {
-        start();
+        lastActivity = Date.now();
+        writeTimer({ nextDue: Date.now() + intervalMs(), pausedSince: null });
         updateIdle();
       }
     })

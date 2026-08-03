@@ -1,10 +1,12 @@
 {
   "drinkWater.dismiss.title": "重設飲水計時",
   "drinkWater.remindNow.title": "立即顯示飲水提醒",
+  "drinkWater.togglePause.title": "暫停／繼續飲水倒數",
   "drinkWater.enabled.description": "啟用提醒",
   "drinkWater.modal.description": "夠鐘時彈出對話框；關咗就只喺 Status Bar 顯示",
   "drinkWater.bounceLogo.description": "夠鐘時彈出 Bouncing DVD 風格嘅黑底 panel，💧 喺入面彈下彈下（20 秒自動收）",
   "drinkWater.intervalMinutes.description": "提醒間隔（分鐘）",
+  "drinkWater.idlePauseMinutes.description": "冇打字咁耐（分鐘）就自動凍結倒數；0 = 關閉",
   "drinkWater.language.description": "內置提醒短句的語言；'auto' 會跟 VS Code 顯示語言",
   "drinkWater.cupTarget.description": "每日飲水目標（杯數），顯示喺 Status Bar；設 0 就唔顯示。撳一下提醒計一杯。",
   "drinkWater.messages.description": "輪流顯示的提醒短句；留空則用內置短句，亦可自己填任何語言"
