@@ -2,20 +2,14 @@
 
 <img width="1875" height="991" alt="動畫" src="https://github.com/user-attachments/assets/bc613cda-ddac-4a28-b9be-574987657f90" />
 
-Stops you from coding for 5 hours straight without drinking anything.
-
-It's a small VS Code extension: a timer runs in the background, and when it's up the status bar turns yellow and tells you to drink water. You click it, it records a cup, timer restarts. That's the whole thing.
-
-No telemetry. No network. No runtime dependencies. Just a `setInterval` and a status bar item.
+Stop coding, is time to drink water. That's the whole thing.
 
 ## Features
 
-- **Status bar reminder** — shows a message like "Time to drink some water!" and highlights itself when the timer's up
-- **Modal option** — if you want to be *really* annoyed, it pops a dialog that blocks until you click OK. Clicking OK also counts a cup
-- **Bouncing DVD logo option** — the reminder bounces around a black panel like an old DVD screensaver for 20 seconds. This exists because I asked for it
-- **Daily cup counter** — status bar shows `💧 4/8`. Click the reminder and it goes up. Resets at midnight
-- **50 messages × 3 languages** — en, zh-tw, zh-cn. Or set your own and it uses those instead
-- No emoji in the built-in messages, I removed them on request. The status bar icon is separate UI
+1. Status bar reminder
+2. pop up modal to annoying you
+3. DVD logo lmao
+4. Drink counter
 
 ## Install
 
