@@ -84,9 +84,6 @@ MIT
 
 # 喝個水吧
 
-![demo](animation_720.gif)
-![drink_dist](drink_hist.png)
-
 別再寫程式了，該喝水了。就這麼簡單。
 
 ## 功能
