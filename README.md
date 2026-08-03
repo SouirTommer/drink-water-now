@@ -1,17 +1,19 @@
 # Drink the water right nowww
 
 ![demo](animation_720.gif)
+![drink_dist](drink_hist.png)
 
 Stop coding, is time to drink water. That's the whole thing.
 
 ## Features
 
 1. Status bar reminder
-2. pop up modal to annoying you
-3. DVD logo lmao
+2. Full-screen blocker with a DVD-style bouncing 💧 (click it to count a cup)
+3. Red theme flash when it's time to drink
 4. Drink counter
 5. Countdown in the status bar (bottom right). Click it to pause/resume
 6. Auto-freeze when you step away, resumes when you start typing
+7. Drink history in the Explorer view (a GitHub commit-graph-style list of every cup)
 
 ## Install
 
@@ -36,6 +38,7 @@ Search `drink water` in Settings. Everything has a default, so you don't need to
 | `drinkWater.intervalMinutes` | `30` | How often it nags you |
 | `drinkWater.idlePauseMinutes` | `5` | Auto-pause after no typing for this long. `0` = off |
 | `drinkWater.blocker` | `true` | Full-screen page that fills the editor and re-opens when closed. Confirm button unlocks after a delay |
+| `drinkWater.redAlert` | `false` | Switch VS Code to the red theme when it's time to drink, restore after you confirm |
 | `drinkWater.confirmDelaySeconds` | `3` | Blocker confirm button delay (0–30s). `0` = clickable immediately |
 | `drinkWater.bounceLogo` | `true` | DVD screensaver panel. Also set to false if you hate it |
 | `drinkWater.language` | `auto` | `auto`, `en`, `zh-tw`, `zh-cn` |

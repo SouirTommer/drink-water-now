@@ -28,6 +28,90 @@ export function activate(context: vscode.ExtensionContext): void {
   let i = 0;
   let lastActivity = Date.now();
   let blockerDismissed = false;
+  let redStored: string | null = context.globalState.get<string | null>('redOriginal', null);
+  if (
+    redStored !== null &&
+    vscode.workspace.getConfiguration('workbench').get<string>('colorTheme', '') === 'Red'
+  ) {
+    void vscode.workspace
+      .getConfiguration('workbench')
+      .update('colorTheme', redStored, vscode.ConfigurationTarget.Global);
+    redStored = null;
+    void context.globalState.update('redOriginal', undefined);
+  }
+
+  class DrinkHistoryProvider implements vscode.WebviewViewProvider {
+    private view: vscode.WebviewView | undefined;
+    resolveWebviewView(view: vscode.WebviewView): void {
+      this.view = view;
+      this.render();
+    }
+    refresh(): void {
+      this.render();
+    }
+    private render(): void {
+      if (!this.view) return;
+      const drinks = context.globalState.get<number[]>('drinks', []);
+      const byDay = new Map<string, number>();
+      for (const ts of drinks) {
+        const d = new Date(ts);
+        const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        byDay.set(key, (byDay.get(key) ?? 0) + 1);
+      }
+      const cells: { date: string; count: number }[] = [];
+      for (let i = 104; i >= 0; i--) {
+        const d = new Date(Date.now() - i * 86400000);
+        const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        cells.push({ date: key, count: byDay.get(key) ?? 0 });
+      }
+      const level = (n: number): number => (n >= 7 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0);
+      const cellsHtml = cells
+        .map((c) => `<div class="c l${level(c.count)}" title="${c.date}: ${c.count} cup${c.count === 1 ? '' : 's'}"></div>`)
+        .join('');
+      const total = cells.reduce((a, c) => a + c.count, 0);
+      const week = cells.slice(-7).reduce((a, c) => a + c.count, 0);
+      this.view.webview.html = `<!DOCTYPE html>
+<html>
+<style>
+  body { margin: 0; padding: 6px; font-family: system-ui; font-size: 11px; }
+  .stats { color: var(--vscode-foreground); margin-bottom: 6px; }
+  .grid { display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(7, auto);
+          gap: 3px; }
+  .c { width: 100%; aspect-ratio: 1; border-radius: 2px; }
+  .l0 { background: #21262d; } .l1 { background: #0d3b66; }
+  .l2 { background: #0e6ba8; } .l3 { background: #33a3dc; } .l4 { background: #7fd8f7; }
+</style>
+<body>
+  <div class="stats">Last 105 days: <b>${total}</b> cups · last 7 days: <b>${week}</b></div>
+  <div class="grid">${cellsHtml}</div>
+</body>
+</html>`;
+    }
+  }
+  const drinkProvider = new DrinkHistoryProvider();
+
+  function addDrink(ts: number): void {
+    const list = context.globalState.get<number[]>('drinks', []);
+    list.push(ts);
+    void context.globalState.update('drinks', list.slice(-200));
+  }
+
+  function dayKey(d: Date): string {
+    return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  function resetDrinks(all: boolean): void {
+    const todayKey = dayKey(new Date());
+    if (all) {
+      void context.globalState.update('drinks', []);
+    } else {
+      const list = context.globalState.get<number[]>('drinks', []).filter((t) => dayKey(new Date(t)) !== todayKey);
+      void context.globalState.update('drinks', list);
+    }
+    void context.globalState.update('cups', { date: today(), count: 0 });
+    drinkProvider.refresh();
+    updateIdle();
+  }
 
   const get = (key: string): unknown =>
     vscode.workspace.getConfiguration('drinkWater').get(key);
@@ -115,6 +199,7 @@ export function activate(context: vscode.ExtensionContext): void {
     item.text = msgs[i++ % msgs.length];
     item.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
     item.show();
+    if (cfg.get<boolean>('redAlert', false)) redAlert(true);
     if (cfg.get<boolean>('blocker', false)) {
       showBlockingPanel(item.text);
     } else if (cfg.get<boolean>('bounceLogo', false)) {
@@ -230,6 +315,25 @@ export function activate(context: vscode.ExtensionContext): void {
     const count = (s.date === today() ? s.count : 0) + 1;
     void context.globalState.update('cups', { date: today(), count });
     updateIdle();
+    addDrink(Date.now());
+    drinkProvider.refresh();
+    redAlert(false);
+  }
+
+  function redAlert(on: boolean): void {
+    const wb = vscode.workspace.getConfiguration('workbench');
+    if (on) {
+      const cur = wb.get<string>('colorTheme', '');
+      if (cur !== 'Red' && redStored === null) {
+        redStored = cur;
+        void context.globalState.update('redOriginal', cur);
+        void wb.update('colorTheme', 'Red', vscode.ConfigurationTarget.Global);
+      }
+    } else if (redStored !== null) {
+      void wb.update('colorTheme', redStored, vscode.ConfigurationTarget.Global);
+      redStored = null;
+      void context.globalState.update('redOriginal', undefined);
+    }
   }
 
   function showBouncePanel(): void {
@@ -286,7 +390,12 @@ export function activate(context: vscode.ExtensionContext): void {
   context.subscriptions.push(
     item,
     countdown,
+    vscode.window.registerWebviewViewProvider('drinkWater.history', drinkProvider, {
+      webviewOptions: { retainContextWhenHidden: true },
+    }),
     vscode.commands.registerCommand('drinkWater.dismiss', dismiss),
+    vscode.commands.registerCommand('drinkWater.resetAll', () => resetDrinks(true)),
+    vscode.commands.registerCommand('drinkWater.resetToday', () => resetDrinks(false)),
     vscode.commands.registerCommand('drinkWater.remindNow', remind),
     vscode.commands.registerCommand('drinkWater.togglePause', togglePause),
     vscode.workspace.onDidChangeTextDocument(() => {

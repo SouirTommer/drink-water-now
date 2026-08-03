@@ -2,7 +2,7 @@
   "name": "drink-water-nag",
   "displayName": "Drink Water Nag",
   "description": "Hydration & caffeine break reminders — status bar, blocking fullscreen page, or bouncing DVD logo.",
-  "version": "0.0.3",
+  "version": "0.0.4",
   "publisher": "souirtommer",
   "repository": {
     "type": "git",
@@ -20,6 +20,16 @@
   "main": "./out/extension.js",
   "icon": "icon.png",
   "contributes": {
+    "views": {
+      "explorer": [
+        {
+          "id": "drinkWater.history",
+          "name": "%drinkWater.history.name%",
+          "type": "webview",
+          "icon": "icon.png"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "drinkWater.dismiss",
@@ -28,6 +38,14 @@
       {
         "command": "drinkWater.remindNow",
         "title": "%drinkWater.remindNow.title%"
+      },
+      {
+        "command": "drinkWater.resetAll",
+        "title": "%drinkWater.resetAll.title%"
+      },
+      {
+        "command": "drinkWater.resetToday",
+        "title": "%drinkWater.resetToday.title%"
       },
       {
         "command": "drinkWater.togglePause",
@@ -46,6 +64,11 @@
           "type": "boolean",
           "default": true,
           "description": "%drinkWater.blocker.description%"
+        },
+        "drinkWater.redAlert": {
+          "type": "boolean",
+          "default": true,
+          "description": "%drinkWater.redAlert.description%"
         },
         "drinkWater.confirmDelaySeconds": {
           "type": "number",
