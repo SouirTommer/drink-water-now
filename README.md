@@ -1,5 +1,7 @@
 # 💧 drink-water
 
+<img width="1920" height="1032" alt="Recording 2026-08-03 at 12 20 34" src="https://github.com/user-attachments/assets/35f6e0dd-49fb-4e81-a7f1-a0e3996ebbcb" />
+
 Stops you from coding for 5 hours straight without drinking anything.
 
 It's a small VS Code extension: a timer runs in the background, and when it's up the status bar turns yellow and tells you to drink water. You click it, it records a cup, timer restarts. That's the whole thing.
