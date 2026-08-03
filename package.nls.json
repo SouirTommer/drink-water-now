@@ -4,6 +4,7 @@
   "drinkWater.remindNow.title": "Show Drink Water Reminder Now",
   "drinkWater.resetAll.title": "Reset All Drink Records",
   "drinkWater.resetToday.title": "Reset Today's Drink Records",
+  "drinkWater.seedDemo.title": "Seed Demo Drink Records",
   "drinkWater.togglePause.title": "Pause/Resume Drink Water Countdown",
   "drinkWater.enabled.description": "Enable the reminder",
   "drinkWater.blocker.description": "Full-screen page that fills the editor, re-opens if you try to close it, and needs a confirm click.",

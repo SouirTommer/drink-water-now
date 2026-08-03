@@ -48,6 +48,10 @@
         "title": "%drinkWater.resetToday.title%"
       },
       {
+        "command": "drinkWater.seedDemo",
+        "title": "%drinkWater.seedDemo.title%"
+      },
+      {
         "command": "drinkWater.togglePause",
         "title": "%drinkWater.togglePause.title%"
       }

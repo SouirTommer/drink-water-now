@@ -40,13 +40,17 @@ export function activate(context: vscode.ExtensionContext): void {
     void context.globalState.update('redOriginal', undefined);
   }
 
+  const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+
   class DrinkHistoryProvider implements vscode.WebviewViewProvider {
     private view: vscode.WebviewView | undefined;
+    private pendingFlash = false;
     resolveWebviewView(view: vscode.WebviewView): void {
       this.view = view;
       this.render();
     }
-    refresh(): void {
+    refresh(flash = false): void {
+      this.pendingFlash = flash;
       this.render();
     }
     private render(): void {
@@ -54,35 +58,62 @@ export function activate(context: vscode.ExtensionContext): void {
       const drinks = context.globalState.get<number[]>('drinks', []);
       const byDay = new Map<string, number>();
       for (const ts of drinks) {
-        const d = new Date(ts);
-        const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+        const key = dayKey(new Date(ts));
         byDay.set(key, (byDay.get(key) ?? 0) + 1);
       }
-      const cells: { date: string; count: number }[] = [];
-      for (let i = 104; i >= 0; i--) {
-        const d = new Date(Date.now() - i * 86400000);
-        const key = `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
-        cells.push({ date: key, count: byDay.get(key) ?? 0 });
+      const now = new Date();
+      const start = new Date(now);
+      start.setDate(now.getDate() - 104);
+      start.setDate(start.getDate() - start.getDay());
+      const todayKey = dayKey(now);
+      const cells: { date: string; count: number; month: number }[] = [];
+      const cur = new Date(start);
+      while (cur <= now) {
+        const key = dayKey(cur);
+        cells.push({ date: key, count: byDay.get(key) ?? 0, month: cur.getMonth() });
+        cur.setDate(cur.getDate() + 1);
       }
+      const flash = this.pendingFlash;
+      this.pendingFlash = false;
+      const cols = Math.ceil(cells.length / 7);
       const level = (n: number): number => (n >= 7 ? 4 : n >= 4 ? 3 : n >= 2 ? 2 : n >= 1 ? 1 : 0);
       const cellsHtml = cells
-        .map((c) => `<div class="c l${level(c.count)}" title="${c.date}: ${c.count} cup${c.count === 1 ? '' : 's'}"></div>`)
+        .map((c, i) => {
+          const today = c.date === todayKey;
+          const cls = today ? (flash ? 'today flash' : 'today') : '';
+          return `<div class="c l${level(c.count)} ${cls}" style="grid-row:${(i % 7) + 1};grid-column:${Math.floor(i / 7) + 1}" title="${c.date}: ${c.count} cup${c.count === 1 ? '' : 's'}"></div>`;
+        })
         .join('');
+      let prev = -1;
+      const months: string[] = [];
+      for (let c = 0; c < cols; c++) {
+        const m = c * 7 < cells.length ? cells[c * 7].month : prev;
+        months.push(m === prev ? '' : MONTHS[m]);
+        prev = m;
+      }
+      const monthsHtml = months.map((m) => `<div>${m}</div>`).join('');
       const total = cells.reduce((a, c) => a + c.count, 0);
       const week = cells.slice(-7).reduce((a, c) => a + c.count, 0);
       this.view.webview.html = `<!DOCTYPE html>
 <html>
 <style>
   body { margin: 0; padding: 6px; font-family: system-ui; font-size: 11px; }
-  .stats { color: var(--vscode-foreground); margin-bottom: 6px; }
-  .grid { display: grid; grid-template-columns: repeat(15, 1fr); grid-template-rows: repeat(7, auto);
-          gap: 3px; }
+  .stats { color: var(--vscode-foreground); margin-bottom: 4px; }
+  .months { display: grid; grid-template-columns: repeat(${cols}, 1fr); gap: 3px;
+            font-size: 9px; color: var(--vscode-foreground); opacity: .6; margin-bottom: 2px; }
+  .grid { display: grid; grid-template-columns: repeat(${cols}, 1fr);
+          grid-template-rows: repeat(7, auto); gap: 3px; }
   .c { width: 100%; aspect-ratio: 1; border-radius: 2px; }
-  .l0 { background: #21262d; } .l1 { background: #0d3b66; }
-  .l2 { background: #0e6ba8; } .l3 { background: #33a3dc; } .l4 { background: #7fd8f7; }
+  .l0 { background: #21262d; } .l1 { background: #7fd8f7; }
+  .l2 { background: #33a3dc; } .l3 { background: #0e6ba8; } .l4 { background: #0d3b66; }
+  .today { outline: 2px solid rgba(255, 255, 255, 0.8); outline-offset: 1px; }
+  @keyframes pulse { 0%, 100% { box-shadow: 0 0 0 0 rgba(80, 200, 255, 0); }
+                     50% { box-shadow: 0 0 0 4px rgba(80, 200, 255, 0.9); } }
+  .flash { animation: pulse 0.5s ease 3; }
 </style>
 <body>
-  <div class="stats">Last 105 days: <b>${total}</b> cups · last 7 days: <b>${week}</b></div>
+  <div class="stats">Last 15 weeks: <b>${total}</b> cups · last 7 days: <b>${week}</b></div>
+  <div class="months">${monthsHtml}</div>
   <div class="grid">${cellsHtml}</div>
 </body>
 </html>`;
@@ -90,14 +121,20 @@ export function activate(context: vscode.ExtensionContext): void {
   }
   const drinkProvider = new DrinkHistoryProvider();
 
-  function addDrink(ts: number): void {
-    const list = context.globalState.get<number[]>('drinks', []);
-    list.push(ts);
-    void context.globalState.update('drinks', list.slice(-200));
-  }
-
   function dayKey(d: Date): string {
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
+  }
+
+  function seedDemo(): void {
+    const list: number[] = [];
+    for (let i = 104; i >= 0; i--) {
+      const d = new Date(Date.now() - i * 86400000);
+      const count = 2 + Math.floor(Math.random() * 6);
+      for (let c = 0; c < count; c++) list.push(d.getTime() + c * 3600000);
+    }
+    void context.globalState.update('drinks', list).then(() => drinkProvider.refresh());
+    void context.globalState.update('cups', { date: today(), count: 0 });
+    updateIdle();
   }
 
   function resetDrinks(all: boolean): void {
@@ -313,11 +350,22 @@ export function activate(context: vscode.ExtensionContext): void {
   function dismiss(): void {
     const s = context.globalState.get<{ date: string; count: number }>('cups', { date: '', count: 0 });
     const count = (s.date === today() ? s.count : 0) + 1;
-    void context.globalState.update('cups', { date: today(), count });
-    updateIdle();
-    addDrink(Date.now());
-    drinkProvider.refresh();
+    const drinks = context.globalState.get<number[]>('drinks', []);
+    drinks.push(Date.now());
+    const target = get('cupTarget') as number;
+    item.text = (target > 0 ? `💧 ${count}/${target}` : '💧') + ' ✓';
+    item.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+    void Promise.all([
+      context.globalState.update('cups', { date: today(), count }),
+      context.globalState.update('drinks', drinks),
+    ]).then(() => drinkProvider.refresh(true));
     redAlert(false);
+    writeTimer({ nextDue: Date.now() + intervalMs(), pausedSince: null });
+    showCountdown(readTimer());
+    setTimeout(() => {
+      item.backgroundColor = undefined;
+      updateIdle();
+    }, 1200);
   }
 
   function redAlert(on: boolean): void {
@@ -396,6 +444,7 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('drinkWater.dismiss', dismiss),
     vscode.commands.registerCommand('drinkWater.resetAll', () => resetDrinks(true)),
     vscode.commands.registerCommand('drinkWater.resetToday', () => resetDrinks(false)),
+    vscode.commands.registerCommand('drinkWater.seedDemo', seedDemo),
     vscode.commands.registerCommand('drinkWater.remindNow', remind),
     vscode.commands.registerCommand('drinkWater.togglePause', togglePause),
     vscode.workspace.onDidChangeTextDocument(() => {

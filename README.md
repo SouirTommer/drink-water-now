@@ -13,7 +13,7 @@ Stop coding, is time to drink water. That's the whole thing.
 4. Drink counter
 5. Countdown in the status bar (bottom right). Click it to pause/resume
 6. Auto-freeze when you step away, resumes when you start typing
-7. Drink history in the Explorer view (a GitHub commit-graph-style list of every cup)
+7. Drink history in the Explorer view — a GitHub-style contribution heatmap (15 weeks) of every cup
 
 ## Install
 
@@ -52,6 +52,8 @@ One thing to know: `drinkWater.messages` overrides the language setting. If you 
 - **Reset Drink Water Timer** — resets and records a cup (same as clicking the status bar)
 - **Show Drink Water Reminder Now** — fires a reminder on demand. Handy for testing without waiting 30 minutes
 - **Pause/Resume Drink Water Countdown** — same as clicking the countdown in the status bar
+- **Reset Today's Drink Records** — clears today's history and counter
+- **Reset All Drink Records** — clears the whole history and counter
 
 ## Development
 

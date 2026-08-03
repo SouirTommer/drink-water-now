@@ -4,6 +4,7 @@
   "drinkWater.remindNow.title": "立即显示饮水提醒",
   "drinkWater.resetAll.title": "重置全部饮水记录",
   "drinkWater.resetToday.title": "重置今日饮水记录",
+  "drinkWater.seedDemo.title": "填入示例饮水记录",
   "drinkWater.togglePause.title": "暂停/继续饮水倒计时",
   "drinkWater.enabled.description": "启用提醒",
   "drinkWater.blocker.description": "全屏拦门：占满编辑区，想关会立刻再弹，必须点确认",
