@@ -1,0 +1,59 @@
+{
+  "name": "drink-water",
+  "displayName": "Drink Water Reminder",
+  "description": "💧 夠鐘飲水啦！— Status Bar 飲水／休息提醒",
+  "version": "0.0.1",
+  "publisher": "demo",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "drinkWater.dismiss",
+        "title": "%drinkWater.dismiss.title%"
+      }
+    ],
+    "configuration": {
+      "title": "Drink Water",
+      "properties": {
+        "drinkWater.enabled": {
+          "type": "boolean",
+          "default": true,
+          "description": "%drinkWater.enabled.description%"
+        },
+        "drinkWater.intervalMinutes": {
+          "type": "number",
+          "default": 1,
+          "minimum": 1,
+          "description": "%drinkWater.intervalMinutes.description%"
+        },
+        "drinkWater.messages": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [],
+          "description": "%drinkWater.messages.description%"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "npm run compile"
+  },
+  "devDependencies": {
+    "@types/node": "^20.19.43",
+    "@types/vscode": "^1.125.0",
+    "typescript": "^5.9.3"
+  }
+}
