@@ -1,7 +1,7 @@
 {
   "name": "drink-water-nag",
   "displayName": "Drink Water Nag",
-  "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo.",
+  "description": "Hydration & caffeine break reminders — status bar, blocking fullscreen page, or bouncing DVD logo.",
   "version": "0.0.3",
   "publisher": "souirtommer",
   "repository": {
@@ -42,10 +42,17 @@
           "default": true,
           "description": "%drinkWater.enabled.description%"
         },
-        "drinkWater.modal": {
+        "drinkWater.blocker": {
           "type": "boolean",
           "default": true,
-          "description": "%drinkWater.modal.description%"
+          "description": "%drinkWater.blocker.description%"
+        },
+        "drinkWater.confirmDelaySeconds": {
+          "type": "number",
+          "default": 3,
+          "minimum": 0,
+          "maximum": 30,
+          "description": "%drinkWater.confirmDelaySeconds.description%"
         },
         "drinkWater.bounceLogo": {
           "type": "boolean",

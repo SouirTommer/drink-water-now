@@ -27,6 +27,7 @@ export function activate(context: vscode.ExtensionContext): void {
   let ticker: ReturnType<typeof setInterval> | undefined;
   let i = 0;
   let lastActivity = Date.now();
+  let blockerDismissed = false;
 
   const get = (key: string): unknown =>
     vscode.workspace.getConfiguration('drinkWater').get(key);
@@ -114,12 +115,114 @@ export function activate(context: vscode.ExtensionContext): void {
     item.text = msgs[i++ % msgs.length];
     item.backgroundColor = new vscode.ThemeColor('statusBarItem.warningBackground');
     item.show();
-    if (cfg.get<boolean>('modal', true)) {
-      void vscode.window.showInformationMessage(item.text, { modal: true }).then(dismiss);
-    }
-    if (cfg.get<boolean>('bounceLogo', false)) {
+    if (cfg.get<boolean>('blocker', false)) {
+      showBlockingPanel(item.text);
+    } else if (cfg.get<boolean>('bounceLogo', false)) {
       showBouncePanel();
     }
+  }
+
+  function showBlockingPanel(msg: string): void {
+    blockerDismissed = false;
+    const cfg = vscode.workspace.getConfiguration('drinkWater');
+    const delay = cfg.get<number>('confirmDelaySeconds', 3);
+    const bounce = cfg.get<boolean>('bounceLogo', false);
+    const safe = msg.replace(/</g, '&lt;').replace(/&/g, '&amp;').replace(/>/g, '&gt;');
+    const logoCss = bounce
+      ? `#logo { position: absolute; width: 100px; height: 120px; z-index: 0; cursor: pointer;
+          animation: bx 7s linear infinite, by 5s linear infinite; }
+         @keyframes bx { 0% { left: 0; } 50% { left: calc(100% - 100px); } 100% { left: 0; } }
+         @keyframes by { 0% { top: 0; } 25% { top: calc(100% - 120px); } 50% { top: 0; }
+                         75% { top: calc(100% - 120px); } 100% { top: 0; } }`
+      : '';
+    const logo = bounce
+      ? `<div id="logo">
+           <svg width="100" height="120" viewBox="0 0 100 120">
+             <path d="M50 5 C50 5 10 55 10 85 a40 40 0 0 0 80 0 C90 55 50 5 50 5 z" fill="#4fc3f7"/>
+             <ellipse cx="38" cy="78" rx="10" ry="5" fill="#e1f5fe" opacity="0.7"/>
+           </svg>
+         </div>`
+      : '';
+
+    const makePanel = (): void => {
+      if (blockerDismissed) return;
+      try {
+        const panel = vscode.window.createWebviewPanel(
+          'drinkWater.block',
+          '💧 DRINK WATER NOW',
+          vscode.ViewColumn.Active,
+          { enableScripts: true }
+        );
+        panel.webview.html = `<!DOCTYPE html>
+<html>
+<style>
+  html, body { margin: 0; height: 100%; background: #111; color: #fff;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    font-family: system-ui; }
+  #content { position: relative; z-index: 1; display: flex; flex-direction: column;
+             align-items: center; }
+  h1 { font-size: 44px; margin: 8px 0; }
+  p  { font-size: 20px; opacity: .85; max-width: 720px; text-align: center; }
+  button { margin-top: 32px; font-size: 22px; padding: 16px 48px; border: none;
+    border-radius: 8px; cursor: pointer; background: #4fc3f7; color: #000; }
+  button:disabled { background: #555; color: #aaa; cursor: not-allowed; }
+  #cd { font-size: 16px; margin-top: 14px; opacity: .6; }
+  ${logoCss}
+</style>
+<body>
+  ${logo}
+  <div id="content">
+    <h1>💧</h1>
+    <h1>DRINK WATER NOW</h1>
+    <p>${safe}</p>
+    <button id="ok" disabled>I drank some water</button>
+    <div id="cd"></div>
+  </div>
+  <script>
+    const ok = document.getElementById('ok');
+    const cd = document.getElementById('cd');
+    let left = ${delay};
+    const t = setInterval(() => {
+      if (left > 0) {
+        cd.textContent = 'Button unlocks in ' + left + 's';
+        left--;
+      } else {
+        clearInterval(t);
+        cd.textContent = '';
+        ok.disabled = false;
+        ok.focus();
+      }
+    }, 1000);
+    ok.addEventListener('click', () => {
+      acquireVsCodeApi().postMessage({ command: 'confirm' });
+    });
+    const logo = document.getElementById('logo');
+    if (logo) {
+      logo.addEventListener('click', () => {
+        acquireVsCodeApi().postMessage({ command: 'confirm' });
+      });
+    }
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') e.preventDefault();
+    });
+  </script>
+</body>
+</html>`;
+        panel.webview.onDidReceiveMessage((m) => {
+          if (m.command === 'confirm') {
+            blockerDismissed = true;
+            panel.dispose();
+            dismiss();
+          }
+        });
+        panel.onDidDispose(() => {
+          if (!blockerDismissed) setTimeout(makePanel, 300);
+        });
+      } catch {
+        // window shutting down; ignore
+      }
+    };
+    makePanel();
   }
 
   function dismiss(): void {
@@ -161,7 +264,10 @@ export function activate(context: vscode.ExtensionContext): void {
 </body>
 </html>`;
     panel.webview.onDidReceiveMessage((msg) => {
-      if (msg.command === 'close') panel.dispose();
+      if (msg.command === 'close') {
+        panel.dispose();
+        dismiss();
+      }
     });
     const t = setTimeout(() => panel.dispose(), 20000);
     panel.onDidDispose(() => clearTimeout(t));

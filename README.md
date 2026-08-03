@@ -35,7 +35,8 @@ Search `drink water` in Settings. Everything has a default, so you don't need to
 | `drinkWater.enabled` | `true` | Master switch |
 | `drinkWater.intervalMinutes` | `30` | How often it nags you |
 | `drinkWater.idlePauseMinutes` | `5` | Auto-pause after no typing for this long. `0` = off |
-| `drinkWater.modal` | `true` | Blocking dialog. Set to false if you hate it |
+| `drinkWater.blocker` | `true` | Full-screen page that fills the editor and re-opens when closed. Confirm button unlocks after a delay |
+| `drinkWater.confirmDelaySeconds` | `3` | Blocker confirm button delay (0–30s). `0` = clickable immediately |
 | `drinkWater.bounceLogo` | `true` | DVD screensaver panel. Also set to false if you hate it |
 | `drinkWater.language` | `auto` | `auto`, `en`, `zh-tw`, `zh-cn` |
 | `drinkWater.cupTarget` | `8` | Daily goal. `0` hides the counter |
