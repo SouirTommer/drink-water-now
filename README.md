@@ -1,6 +1,6 @@
 # 💧 drink-water
 
-<img width="1920" height="1032" alt="Recording 2026-08-03 at 12 20 34" src="https://github.com/user-attachments/assets/35f6e0dd-49fb-4e81-a7f1-a0e3996ebbcb" />
+<img width="1875" height="991" alt="動畫" src="https://github.com/user-attachments/assets/bc613cda-ddac-4a28-b9be-574987657f90" />
 
 Stops you from coding for 5 hours straight without drinking anything.
 
