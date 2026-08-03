@@ -22,7 +22,7 @@ npm install
 npm run package
 ```
 
-That gives you `drink-water-now-0.0.1.vsix`. Install it via Extensions → … → Install from VSIX.
+That gives you `drink-water-nag-0.0.1.vsix`. Install it via Extensions → … → Install from VSIX.
 
 ## Settings
 

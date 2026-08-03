@@ -1,9 +1,13 @@
 {
-  "name": "drink-water-now",
-  "displayName": "Drink Water reminder",
+  "name": "drink-water-nag",
+  "displayName": "Drink Water Nag",
   "description": "Hydration & caffeine break reminders — status bar, modal dialog, or bouncing DVD logo.",
   "version": "0.0.1",
-  "publisher": "Tommer",
+  "publisher": "souirtommer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/souirtommer/drink-water-now"
+  },
   "engines": {
     "vscode": "^1.85.0"
   },
