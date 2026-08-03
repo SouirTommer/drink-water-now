@@ -18,7 +18,7 @@ export function activate(context: vscode.ExtensionContext): void {
   console.log('[drink-water] activated');
   const item = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Left, 100);
   item.command = 'drinkWater.dismiss';
-  item.tooltip = '💧 Drink water — click to count a cup';
+  item.tooltip = '💧 Drink water — click to count a cup (ml)';
 
   const countdown = vscode.window.createStatusBarItem(vscode.StatusBarAlignment.Right, 100);
   countdown.command = 'drinkWater.togglePause';
@@ -26,6 +26,7 @@ export function activate(context: vscode.ExtensionContext): void {
 
   let ticker: ReturnType<typeof setInterval> | undefined;
   let i = 0;
+  let dayCheck = 0;
   let lastActivity = Date.now();
   let blockerDismissed = false;
   let redStored: string | null = context.globalState.get<string | null>('redOriginal', null);
@@ -125,18 +126,6 @@ export function activate(context: vscode.ExtensionContext): void {
     return `${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
   }
 
-  function seedDemo(): void {
-    const list: number[] = [];
-    for (let i = 104; i >= 0; i--) {
-      const d = new Date(Date.now() - i * 86400000);
-      const count = 2 + Math.floor(Math.random() * 6);
-      for (let c = 0; c < count; c++) list.push(d.getTime() + c * 3600000);
-    }
-    void context.globalState.update('drinks', list).then(() => drinkProvider.refresh());
-    void context.globalState.update('cups', { date: today(), count: 0 });
-    updateIdle();
-  }
-
   function resetDrinks(all: boolean): void {
     const todayKey = dayKey(new Date());
     if (all) {
@@ -145,7 +134,7 @@ export function activate(context: vscode.ExtensionContext): void {
       const list = context.globalState.get<number[]>('drinks', []).filter((t) => dayKey(new Date(t)) !== todayKey);
       void context.globalState.update('drinks', list);
     }
-    void context.globalState.update('cups', { date: today(), count: 0 });
+    void context.globalState.update('cups', { date: today(), ml: 0 });
     drinkProvider.refresh();
     updateIdle();
   }
@@ -164,18 +153,39 @@ export function activate(context: vscode.ExtensionContext): void {
 
   const intervalMs = (): number => (get('intervalMinutes') as number) * 60000;
 
-  function getCups(): number {
-    const s = context.globalState.get<{ date: string; count: number }>('cups', { date: '', count: 0 });
+  const mlPerCup = (): number => (get('mlPerCup') as number) || 350;
+  const targetMl = (): number => (get('cupTarget') as number) * mlPerCup();
+
+  function getMl(): number {
+    const s = context.globalState.get<{ date: string; ml: number }>('cups', { date: '', ml: 0 });
     if (s.date !== today()) {
-      void context.globalState.update('cups', { date: today(), count: 0 });
+      void context.globalState.update('cups', { date: today(), ml: 0 });
       return 0;
     }
-    return s.count;
+    return typeof s.ml === 'number' ? s.ml : 0;
+  }
+
+  function progressTooltip(ml: number): vscode.MarkdownString {
+    const md = new vscode.MarkdownString();
+    const t = targetMl();
+    md.appendMarkdown('**Drink Water**  \n');
+    if (t > 0) {
+      const pct = Math.min(100, Math.round((ml / t) * 100));
+      const filled = Math.round((pct / 100) * 20);
+      md.appendMarkdown('`' + '▰'.repeat(filled) + '▱'.repeat(20 - filled) + '`  \n');
+      md.appendMarkdown(`**${ml}ml / ${t}ml** (${pct}%)`);
+      if (ml >= t) md.appendMarkdown('  ✅ Goal reached!');
+    } else {
+      md.appendMarkdown(`**${ml}ml**`);
+    }
+    return md;
   }
 
   function updateIdle(): void {
-    const target = get('cupTarget') as number;
-    item.text = target > 0 ? `💧 ${getCups()}/${target}` : '💧';
+    const ml = getMl();
+    const t = targetMl();
+    item.text = t > 0 ? `💧 ${ml}ml/${t}ml` : `💧 ${ml}ml`;
+    item.tooltip = progressTooltip(ml);
     item.backgroundColor = undefined;
     item.show();
   }
@@ -197,6 +207,12 @@ export function activate(context: vscode.ExtensionContext): void {
     if (!get('enabled')) {
       countdown.hide();
       return;
+    }
+    if (
+      dayCheck++ % 60 === 0 &&
+      context.globalState.get<{ date: string }>('cups', { date: '' }).date !== today()
+    ) {
+      updateIdle();
     }
     const now = Date.now();
     const idleMin = get('idlePauseMinutes') as number;
@@ -348,22 +364,25 @@ export function activate(context: vscode.ExtensionContext): void {
   }
 
   function dismiss(): void {
-    const s = context.globalState.get<{ date: string; count: number }>('cups', { date: '', count: 0 });
-    const count = (s.date === today() ? s.count : 0) + 1;
+    const s = context.globalState.get<{ date: string; ml: number }>('cups', { date: '', ml: 0 });
+    const oldMl = s.date === today() ? (typeof s.ml === 'number' ? s.ml : 0) : 0;
+    const ml = oldMl + mlPerCup();
     const drinks = context.globalState.get<number[]>('drinks', []);
     drinks.push(Date.now());
-    const target = get('cupTarget') as number;
-    item.text = (target > 0 ? `💧 ${count}/${target}` : '💧') + ' ✓';
-    item.backgroundColor = new vscode.ThemeColor('statusBarItem.prominentBackground');
+    const t = targetMl();
+    item.text = `${t > 0 ? `💧 ${ml}ml/${t}ml` : `💧 ${ml}ml`} ✓`;
+    const crossed = [1500, 2000, 4000].find((th) => ml >= th && oldMl < th);
+    if (crossed !== undefined) {
+      void vscode.window.showInformationMessage(`🎉 ${crossed}ml today! Keep it up.`);
+    }
     void Promise.all([
-      context.globalState.update('cups', { date: today(), count }),
+      context.globalState.update('cups', { date: today(), ml }),
       context.globalState.update('drinks', drinks),
     ]).then(() => drinkProvider.refresh(true));
     redAlert(false);
     writeTimer({ nextDue: Date.now() + intervalMs(), pausedSince: null });
     showCountdown(readTimer());
     setTimeout(() => {
-      item.backgroundColor = undefined;
       updateIdle();
     }, 1200);
   }
@@ -444,7 +463,6 @@ export function activate(context: vscode.ExtensionContext): void {
     vscode.commands.registerCommand('drinkWater.dismiss', dismiss),
     vscode.commands.registerCommand('drinkWater.resetAll', () => resetDrinks(true)),
     vscode.commands.registerCommand('drinkWater.resetToday', () => resetDrinks(false)),
-    vscode.commands.registerCommand('drinkWater.seedDemo', seedDemo),
     vscode.commands.registerCommand('drinkWater.remindNow', remind),
     vscode.commands.registerCommand('drinkWater.togglePause', togglePause),
     vscode.workspace.onDidChangeTextDocument(() => {

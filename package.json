@@ -48,10 +48,6 @@
         "title": "%drinkWater.resetToday.title%"
       },
       {
-        "command": "drinkWater.seedDemo",
-        "title": "%drinkWater.seedDemo.title%"
-      },
-      {
         "command": "drinkWater.togglePause",
         "title": "%drinkWater.togglePause.title%"
       }
@@ -80,6 +76,12 @@
           "minimum": 0,
           "maximum": 30,
           "description": "%drinkWater.confirmDelaySeconds.description%"
+        },
+        "drinkWater.mlPerCup": {
+          "type": "number",
+          "default": 350,
+          "minimum": 1,
+          "description": "%drinkWater.mlPerCup.description%"
         },
         "drinkWater.bounceLogo": {
           "type": "boolean",
